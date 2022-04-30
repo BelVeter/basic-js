@@ -13,10 +13,87 @@ const { NotImplementedError } = require('../extensions/index.js');
  * transform([1, 2, 3, '--discard-prev', 4, 5]) => [1, 2, 4, 5]
  * 
  */
-function transform(/* arr */) {
-  // console.log(arr);
+function transform(arr) {
+  // fs = require('fs');
+  // fs.writeFile('helloworld.txt', 'Hello World!', function (err) {
+  //   if (err) return console.log(err);
+  //   console.log('Hello World > helloworld.txt');
+  // });
+
+  if(!Array.isArray(arr)) {
+    throw new Error("'arr' parameter must be an instance of the Array!");
+  }
+
+
+  //console.log(arr);
+  let arrCopy = arr.slice();
+  //console.log(arrCopy);
+  let skipStep=false;
+  arrCopy.forEach((el, index) => {
+    if(isControll(el)){
+      if(skipStep){
+        skipStep=false;
+        return;
+      }
+      switch(el){
+        case '--discard-next':
+          if(index<arrCopy.length-1) {
+            delete(arrCopy[index+1]);
+          }
+        break;
+        case '--discard-prev':
+          if(index>0) {
+            delete(arrCopy[index-1]);
+          }
+        break;
+        case '--double-next':
+          arrCopy.splice(index+1, 0, arrCopy[index+1]);
+        break;
+        case '--double-prev':
+          arrCopy.splice(index-1, 0, arrCopy[index-1]);
+          skipStep=true;
+        break;
+        default:
+          //console.log('no way')
+          break;
+      }
+    }
+    //console.log(el)
+  });
+
+  let outArray=arrCopy.filter((el)=>{
+    return (el!==undefined && !isControll(el));
+  });
+
+
+  return outArray;
+
+
+  function isControll(el){
+
+    let controlCodes=['--discard-next', '--discard-prev', '--double-next', '--double-prev'];
+
+    if(typeof el == 'string' && controlCodes.includes(el)) return true;
+    else return false;
+  }
+
+}
+
+console.log(transform([ '1', '--discrard-prev', true ]));
+// console.log(transform([1, 2, 3, '--double-next', 1337, '--double-prev', 4, 5]));
+
+module.exports = {
+  transform
+};
+
+
+
+
+
+
+ // console.log(arr);
   // debugger
-  throw new NotImplementedError('Not implemented');
+  //throw new NotImplementedError('Not implemented');
   // remove line with error and write your code here
 
   // if(!Array.isArray(arr)) {
@@ -64,12 +141,3 @@ function transform(/* arr */) {
   // }
 
   // return rez;
-
-}
-
-// console.log(transform([1, 2, 3, '--double-next', 4, 5]));
-// console.log(transform([ 1, '--discrard-prev', true ]));
-
-module.exports = {
-  transform
-};
